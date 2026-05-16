@@ -69,7 +69,7 @@
   --nav-h: 64px;
 }
 
-html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 24px); }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 24px); overflow-x: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -139,43 +139,81 @@ nav.scrolled {
 .nav-toggle {
   display: none;
   background: none; border: none; cursor: pointer;
-  width: 40px; height: 40px;
+  width: 44px; height: 44px;
   align-items: center; justify-content: center;
   color: var(--text);
-  border-radius: 8px;
+  border-radius: 12px;
   transition: background 0.2s;
+  position: relative;
+  z-index: 110;
 }
 .nav-toggle:hover { background: rgba(129, 220, 198, 0.06); }
-.nav-toggle svg { width: 22px; height: 22px; }
+.nav-toggle svg { width: 22px; height: 22px; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+.nav-toggle.open svg { transform: rotate(45deg); }
+.nav-toggle.open svg path:nth-child(1) { transform: translateY(5px) rotate(45deg); transform-origin: center; }
+.nav-toggle.open svg path:nth-child(2) { opacity: 0; }
+.nav-toggle.open svg path:nth-child(3) { transform: translateY(-5px) rotate(-45deg); transform-origin: center; }
 
 .mobile-menu {
   display: none;
-  position: fixed; top: var(--nav-h); left: 0; right: 0;
-  background: rgba(11, 16, 21, 0.96);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(129, 220, 198, 0.1);
-  padding: 16px;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(11, 16, 21, 0.97);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
   z-index: 99;
-  transform: translateY(-10px);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   opacity: 0;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .mobile-menu.open {
-  transform: translateY(0);
   opacity: 1;
 }
 .mobile-menu a {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 14px;
   color: var(--text-secondary); text-decoration: none;
-  font-size: 15px; font-weight: 500;
-  padding: 14px 16px;
-  border-radius: 10px;
-  transition: all 0.2s;
+  font-size: 18px; font-weight: 500;
+  padding: 16px 28px;
+  border-radius: 14px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 280px;
+  opacity: 0;
+  transform: translateY(12px);
 }
-.mobile-menu a:hover {
+.mobile-menu.open a {
+  opacity: 1;
+  transform: translateY(0);
+}
+.mobile-menu.open a:nth-child(1) { transition-delay: 0.05s; }
+.mobile-menu.open a:nth-child(2) { transition-delay: 0.1s; }
+.mobile-menu.open a:nth-child(3) { transition-delay: 0.15s; }
+.mobile-menu.open a:nth-child(4) { transition-delay: 0.2s; }
+.mobile-menu.open a:nth-child(5) { transition-delay: 0.25s; }
+.mobile-menu.open a:nth-child(6) { transition-delay: 0.3s; }
+.mobile-menu a:hover, .mobile-menu a:active {
   color: var(--text);
-  background: rgba(129, 220, 198, 0.06);
+  background: rgba(129, 220, 198, 0.08);
+}
+.mobile-menu a .menu-icon {
+  width: 20px; height: 20px;
+  color: var(--accent);
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+.mobile-menu-divider {
+  width: 200px;
+  height: 1px;
+  background: rgba(129, 220, 198, 0.1);
+  margin: 12px 0;
+  opacity: 0;
+}
+.mobile-menu.open .mobile-menu-divider {
+  opacity: 1;
+  transition: opacity 0.3s 0.2s;
 }
 
 /* === SECTIONS BASE === */
@@ -258,10 +296,56 @@ section {
   background: var(--accent);
   border-radius: 50%;
   animation: dotPulse 2s ease-in-out infinite;
+  flex-shrink: 0;
 }
 @keyframes dotPulse {
   0%, 100% { opacity: 0.5; }
   50% { opacity: 1; box-shadow: 0 0 10px var(--accent); }
+}
+.badge-labels {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  min-width: 0;
+}
+.badge-label {
+  white-space: nowrap;
+}
+.badge-label + .badge-label::before {
+  content: '\00b7';
+  margin: 0 8px;
+  opacity: 0.5;
+}
+@media (max-width: 639px) {
+  .badge-labels {
+    display: inline-block;
+    position: relative;
+    height: 1.1em;
+    min-width: 160px;
+    overflow: hidden;
+  }
+  .badge-label {
+    position: absolute;
+    left: 0;
+    top: 0;
+    white-space: nowrap;
+    opacity: 0;
+    font-size: 10px;
+    letter-spacing: 0.02em;
+    animation: badgeCycle 9s ease-in-out infinite;
+  }
+  .badge-label + .badge-label::before {
+    content: none;
+    margin: 0;
+  }
+  .badge-label-1 { animation-delay: 0s; }
+  .badge-label-2 { animation-delay: 3s; }
+  .badge-label-3 { animation-delay: 6s; }
+}
+@keyframes badgeCycle {
+  0%, 5% { opacity: 0; transform: translateY(4px); }
+  10%, 28% { opacity: 1; transform: translateY(0); }
+  33%, 100% { opacity: 0; transform: translateY(-4px); }
 }
 .hero h1 {
   font-size: clamp(42px, 6.5vw, 68px);
@@ -676,13 +760,14 @@ section {
   background: rgba(0, 0, 0, 0.15);
 }
 .demo-stats {
-  display: flex; gap: 20px;
+  display: flex; gap: 20px; flex-wrap: wrap;
 }
 .demo-stat {
   font-family: var(--font-mono);
   font-size: 12px;
   color: var(--text-secondary);
   display: flex; align-items: center; gap: 6px;
+  white-space: nowrap;
 }
 .demo-stat .stat-val { color: var(--accent); font-weight: 600; }
 .demo-replay-btn {
@@ -706,13 +791,15 @@ section {
 .demo-replay-btn svg { width: 13px; height: 13px; }
 .demo-controls { display: flex; align-items: center; gap: 10px; }
 .demo-style-select {
-  background: rgba(15, 22, 29, 0.6);
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(15, 22, 29, 0.6) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239cadb8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 10px center;
   border: 1px solid rgba(129, 220, 198, 0.2);
   border-radius: 8px;
   color: #9cadb8;
   font-family: var(--font-mono);
   font-size: 11px;
-  padding: 6px 10px;
+  padding: 6px 32px 6px 12px;
   cursor: pointer;
   outline: none;
   transition: border-color 0.2s;
@@ -841,20 +928,24 @@ section {
 }
 .feature-card:hover::before { opacity: 1; }
 .feature-icon {
-  width: 44px; height: 44px;
+  width: 40px; height: 40px;
   display: flex; align-items: center; justify-content: center;
   background: var(--accent-dim);
-  border-radius: 12px;
-  margin-bottom: 20px;
+  border-radius: 10px;
+  flex-shrink: 0;
 }
-.feature-icon svg { width: 22px; height: 22px; color: var(--accent); }
-.feature-card h3 {
-  font-size: 17px; font-weight: 600;
-  margin-bottom: 8px;
+.feature-icon svg { width: 20px; height: 20px; color: var(--accent); }
+.feature-card-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 10px;
+}
+.feature-card-header h3 {
+  font-size: 16px; font-weight: 600;
   letter-spacing: -0.01em;
+  margin: 0;
 }
 .feature-card p {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-secondary);
   line-height: 1.6;
 }
@@ -1013,10 +1104,17 @@ section {
   background: rgba(129, 220, 198, 0.08);
   border: 1px solid rgba(129, 220, 198, 0.12);
   border-radius: 6px;
-  padding: 4px 12px;
+  padding: 6px;
   cursor: pointer;
   transition: all 0.2s;
   letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.edit-mode-bar-btn.hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 .edit-mode-bar-btn:hover {
   color: var(--accent);
@@ -1031,8 +1129,6 @@ section {
 .edit-mode-body {
   display: grid;
   grid-template-columns: 1fr 300px;
-  min-height: 340px;
-  overflow: hidden;
 }
 .edit-mode-doc {
   padding: 28px 32px;
@@ -1045,12 +1141,13 @@ section {
   -webkit-user-select: text;
   overflow-wrap: break-word;
   word-break: break-word;
+  overflow-x: hidden;
 }
 .edit-mode-doc .entity {
   background: rgba(129, 220, 198, 0.12);
-  border: 1px solid rgba(129, 220, 198, 0.2);
+  border: 1px solid rgba(129, 220, 198, 0.25);
   border-radius: 4px;
-  padding: 1px 4px;
+  padding: 1px 6px;
   color: var(--accent);
   font-family: var(--font-mono);
   font-size: 13px;
@@ -1059,22 +1156,30 @@ section {
   position: relative;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  letter-spacing: 0.02em;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 .edit-mode-doc .entity:hover {
   background: rgba(129, 220, 198, 0.2);
   border-color: var(--accent);
   box-shadow: 0 0 8px rgba(129, 220, 198, 0.15);
 }
-.edit-mode-doc .entity.restored {
-  background: rgba(240, 141, 135, 0.1);
-  border-color: rgba(240, 141, 135, 0.25);
+.edit-mode-doc .entity.revealed {
+  background: rgba(167, 201, 255, 0.1);
+  border-color: rgba(167, 201, 255, 0.3);
   color: var(--text);
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: normal;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
-.edit-mode-doc .entity.restored::after {
-  content: 'restored';
+.edit-mode-doc .entity.revealed::after {
+  content: 'revealed';
   font-size: 9px;
   font-family: var(--font-mono);
-  color: var(--danger);
+  color: var(--progress);
   position: absolute;
   top: -14px;
   left: 0;
@@ -1082,20 +1187,37 @@ section {
   text-transform: uppercase;
   opacity: 0;
   animation: fadeInLabel 0.3s forwards;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 2;
 }
 .edit-mode-doc .manual-redact {
-  background: rgba(239, 202, 130, 0.15);
-  border: 1px solid rgba(239, 202, 130, 0.3);
+  background: rgba(239, 202, 130, 0.08);
+  border: 1px solid rgba(239, 202, 130, 0.2);
   border-radius: 4px;
   padding: 1px 4px;
-  color: var(--warning);
+  color: transparent;
   font-family: var(--font-mono);
   font-size: 13px;
+  letter-spacing: 0.15em;
+  position: relative;
   cursor: pointer;
   transition: all 0.25s;
+  user-select: none;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+.edit-mode-doc .manual-redact::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--warning);
+  opacity: 0.18;
+  border-radius: 3px;
 }
 .edit-mode-doc .manual-redact:hover {
-  background: rgba(239, 202, 130, 0.25);
+  border-color: rgba(239, 202, 130, 0.5);
+  box-shadow: 0 0 6px rgba(239, 202, 130, 0.15);
 }
 @keyframes fadeInLabel {
   from { opacity: 0; transform: translateY(4px); }
@@ -1253,51 +1375,158 @@ section {
 .redaction-styles {
   background: var(--canvas);
 }
-.redaction-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  margin-top: 56px;
-}
-.redaction-card {
+.redaction-demo {
+  max-width: 680px;
+  margin: 56px auto 0;
   background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius);
-  padding: 32px 28px;
-  transition: all 0.35s;
+  overflow: hidden;
 }
-.redaction-card:hover {
-  border-color: var(--accent-border-hover);
-  transform: translateY(-3px);
+.redaction-demo-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: rgba(0,0,0,0.3);
+  border-bottom: 1px solid rgba(129,220,198,0.08);
 }
-.redaction-label {
+.redaction-demo-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.redaction-demo-dots {
+  display: flex; gap: 6px;
+}
+.redaction-demo-dots span {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.redaction-demo-dots span:nth-child(1) { background: #f08d87; }
+.redaction-demo-dots span:nth-child(2) { background: #efca82; }
+.redaction-demo-dots span:nth-child(3) { background: #81dcc6; }
+.redaction-demo-bar-title {
   font-family: var(--font-mono);
-  font-size: 11px; font-weight: 600;
-  color: var(--accent);
-  letter-spacing: 0.1em;
+  font-size: 11px;
+  color: var(--text-secondary);
   text-transform: uppercase;
-  margin-bottom: 20px;
+  letter-spacing: 0.08em;
 }
-.redaction-sample {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(129, 220, 198, 0.06);
-  border-radius: var(--radius-sm);
-  padding: 20px;
+.redaction-style-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(15, 22, 29, 0.6) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239cadb8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 10px center;
+  border: 1px solid rgba(129, 220, 198, 0.2);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 6px 32px 6px 10px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239cadb8'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+.redaction-style-select:focus { border-color: #81dcc6; }
+.redaction-style-select option { background: #0f161d; color: #edf3f6; }
+.redaction-demo-body {
+  padding: 28px 32px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 24px;
+  align-items: start;
+}
+.redaction-demo-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.redaction-demo-col-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+  opacity: 0.7;
+}
+.redaction-demo-input,
+.redaction-demo-output {
   font-family: var(--font-mono);
   font-size: 13px;
   line-height: 2;
   color: var(--text-secondary);
 }
-.redaction-sample .label { color: var(--text); }
-.redaction-sample .redacted { color: var(--accent); }
-.redaction-sample .masked { color: var(--text-secondary); letter-spacing: 0.15em; }
-.redaction-sample .hashed { color: var(--warning); }
-.redaction-desc {
-  font-size: 13px;
+.redaction-demo-input .pii {
+  color: var(--danger);
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-underline-offset: 3px;
+}
+.redaction-demo-output .token {
+  color: var(--accent);
+  font-weight: 500;
+}
+.redaction-demo-output .masked-char {
   color: var(--text-secondary);
-  margin-top: 16px;
-  line-height: 1.5;
-  opacity: 0.8;
+  letter-spacing: 0.1em;
+}
+.redaction-demo-output .hashed {
+  color: var(--warning);
+  font-weight: 500;
+}
+.redaction-demo-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding-top: 28px;
+}
+.redaction-demo-arrow svg {
+  color: var(--accent);
+  opacity: 0.6;
+}
+.redaction-demo-arrow-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+.redaction-demo-note {
+  padding: 12px 20px;
+  border-top: 1px solid rgba(129,220,198,0.06);
+  font-size: 12px;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  text-align: center;
+}
+@media (max-width: 639px) {
+  .redaction-demo-bar { flex-wrap: wrap; gap: 8px; }
+  .redaction-demo-bar-left { flex: 1; }
+  .redaction-style-select { width: 100%; order: 3; font-size: 12px; padding: 10px 28px 10px 12px; }
+  .redaction-demo-body {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 16px;
+  }
+  .redaction-demo-arrow {
+    flex-direction: row;
+    padding-top: 0;
+    justify-content: center;
+  }
+  .redaction-demo-arrow svg { transform: rotate(90deg); }
+  .redaction-demo-input,
+  .redaction-demo-output { font-size: 11px; line-height: 1.8; }
 }
 
 /* === ARCHITECTURE === */
@@ -1339,24 +1568,39 @@ section {
   width: 44px; height: 44px;
   border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
-  margin-bottom: 16px;
   background: rgba(129, 220, 198, 0.08);
   border: 1px solid rgba(129, 220, 198, 0.12);
+  flex-shrink: 0;
 }
 .arch-node-icon svg { color: var(--accent); }
+.arch-node-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.arch-node-header-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.arch-node-header-text .arch-node-title {
+  margin-bottom: 2px;
+}
+.arch-node-header-text .arch-node-sub {
+  margin-bottom: 0;
+}
 .arch-node-title {
   font-family: var(--font-display);
   font-size: 18px;
   font-weight: 600;
   color: var(--text);
-  margin-bottom: 4px;
   letter-spacing: -0.01em;
 }
 .arch-node-sub {
   font-family: var(--font-mono);
   font-size: 12px;
   color: var(--accent);
-  margin-bottom: 12px;
   letter-spacing: 0.02em;
 }
 .arch-node-desc {
@@ -1550,7 +1794,7 @@ footer {
 }
 .problem-flow {
   display: flex;
-  gap: 0;
+  gap: 24px;
   align-items: stretch;
   justify-content: center;
   margin-top: 56px;
@@ -1563,37 +1807,15 @@ footer {
   align-items: center;
   position: relative;
 }
-.problem-connector {
-  width: 48px;
-  min-width: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  flex-shrink: 0;
-}
-.problem-connector::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: 0.4;
-}
-.problem-connector-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 10px rgba(129, 220, 198, 0.5);
-  position: relative;
-  z-index: 1;
-  animation: connectorPulse 2s ease-in-out infinite;
-}
-@keyframes connectorPulse {
-  0%, 100% { box-shadow: 0 0 6px rgba(129, 220, 198, 0.4); transform: scale(1); }
-  50% { box-shadow: 0 0 18px rgba(129, 220, 198, 0.7); transform: scale(1.3); }
+.problem-example-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  opacity: 0.7;
 }
 .problem-mini-terminal {
   background: var(--glass);
@@ -1697,7 +1919,7 @@ footer {
 .use-cases-section { padding: 96px 32px; }
 .use-cases-viewer {
   max-width: 800px;
-  margin: 0 auto;
+  margin: 56px auto 0;
   background: var(--glass);
   backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
@@ -1707,7 +1929,8 @@ footer {
 }
 .uc-tabs {
   display: flex;
-  border-bottom: 1px solid var(--glass-border);
+  gap: 6px;
+  padding: 12px 12px 0;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -1715,35 +1938,89 @@ footer {
 .uc-tab {
   flex: 1;
   min-width: 0;
-  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
+  border-radius: 10px 10px 0 0;
   color: var(--text-muted);
   font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 500;
   cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s ease;
-  border-bottom: 2px solid transparent;
+  transition: all 0.25s cubic-bezier(0.23,1,0.32,1);
   position: relative;
 }
-.uc-tab:hover { color: var(--text); background: rgba(129,220,198,0.04); }
-.uc-tab.active {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-  background: rgba(129,220,198,0.06);
+.uc-tab:hover {
+  color: var(--text);
+  background: rgba(129,220,198,0.04);
+  border-color: rgba(129,220,198,0.08);
 }
+.uc-tab.active {
+  color: var(--text);
+  background: rgba(15,22,29,0.5);
+  border-color: var(--glass-border);
+  border-bottom-color: transparent;
+}
+.uc-tab.active .uc-tab-icon { color: var(--accent); }
+.uc-tab-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(129,220,198,0.06);
+  color: var(--text-muted);
+  transition: all 0.25s cubic-bezier(0.23,1,0.32,1);
+}
+.uc-tab.active .uc-tab-icon {
+  background: rgba(129,220,198,0.12);
+  color: var(--accent);
+  box-shadow: 0 0 12px rgba(129,220,198,0.15);
+}
+.uc-tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  text-align: left;
+}
+.uc-tab-title {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.uc-tab-sub {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text-muted);
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.uc-tab.active .uc-tab-sub { color: var(--accent); opacity: 0.8; }
 .uc-panel {
   display: none;
   padding: 24px;
-  min-height: 260px;
+  min-height: 240px;
+  animation: ucFadeIn 0.3s cubic-bezier(0.23,1,0.32,1);
 }
 .uc-panel.active { display: block; }
+@keyframes ucFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 .uc-scenario {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 .uc-scenario-label {
   font-size: 11px;
@@ -1812,7 +2089,7 @@ footer {
 
 /* === RESPONSIVE === */
 @media (max-width: 1023px) {
-  .features-grid, .redaction-grid { grid-template-columns: repeat(2, 1fr); }
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
   .steps { grid-template-columns: repeat(3, 1fr); }
   .steps::before { display: none; }
   section { padding: 72px 24px; }
@@ -1832,24 +2109,83 @@ footer {
     height: 16px;
     background: rgba(129, 220, 198, 0.3);
   }
-  .edit-mode-body { grid-template-columns: 1fr; min-height: auto; }
-  .edit-mode-doc { border-right: none; border-bottom: 1px solid rgba(129, 220, 198, 0.06); padding: 20px; }
+  .edit-mode-body { grid-template-columns: 1fr; }
+  .edit-mode-doc { border-right: none; border-bottom: 1px solid rgba(129, 220, 198, 0.06); padding: 20px; line-height: 1.9; }
   .edit-mode-sidebar { padding: 16px 20px; }
   .edit-mode-bar { padding: 10px 16px; }
   .edit-mode-bar-title { font-size: 11px; }
-  .problem-flow { flex-direction: column; align-items: center; gap: 8px; }
-  .problem-connector { width: 1px; min-width: 1px; height: 24px; }
-  .problem-connector::before { top: 0; bottom: 0; left: 50%; right: auto; width: 1px; height: 100%; background: linear-gradient(180deg, transparent, var(--accent), transparent); }
+  .problem-flow { flex-direction: column; align-items: center; gap: 24px; }
   .problem-step { max-width: 100%; }
-  .use-cases-viewer { margin: 0 -8px; }
-  .uc-tab { padding: 12px 10px; font-size: 12px; }
+  .problem-example-label { margin-bottom: 8px; }
+  .use-cases-viewer { margin: 40px -8px 0; }
+  .uc-tabs { gap: 4px; padding: 10px 10px 0; }
+  .uc-tab { padding: 10px 10px; gap: 8px; }
+  .uc-tab-icon { width: 28px; height: 28px; }
+  .uc-tab-icon svg { width: 15px; height: 15px; }
+  .uc-tab-title { font-size: 12px; }
+  .uc-tab-sub { display: none; }
   .uc-panel { padding: 20px 16px; min-height: 220px; }
 }
 @media (max-width: 639px) {
-  .hero h1 { font-size: 34px; }
-  .hero p { font-size: 16px; }
-  .hero-actions { flex-direction: column; align-items: center; }
-  .btn-primary, .btn-secondary { width: 100%; max-width: 320px; justify-content: center; }
+  .hero {
+    min-height: auto;
+    padding-top: calc(var(--nav-h) + 24px);
+    padding-bottom: 24px;
+    align-items: flex-start;
+  }
+  .hero-glow {
+    height: 300px;
+    top: -5%;
+  }
+  .hero-content {
+    padding: 0 4px;
+  }
+  .hero-badge {
+    font-size: 10px;
+    padding: 5px 12px 5px 10px;
+    gap: 6px;
+    margin-bottom: 20px;
+    letter-spacing: 0.02em;
+  }
+  .hero-badge .dot {
+    width: 5px; height: 5px;
+  }
+  .badge-labels {
+    height: 1.1em;
+    min-width: 160px;
+  }
+  .hero h1 {
+    font-size: 28px;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+  }
+  .hero p {
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 8px;
+    max-width: 100%;
+  }
+  .hero-tagline {
+    font-size: 12px;
+    margin-bottom: 24px;
+    letter-spacing: 0.04em;
+  }
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-primary, .btn-secondary {
+    width: 100%;
+    max-width: 320px;
+    justify-content: center;
+    font-size: 14px;
+    padding: 12px 24px;
+  }
+  .hero-terminal {
+    margin-top: 28px;
+  }
   .trust-bar { padding: 40px 16px; }
   .trust-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
   .trust-item {
@@ -1864,9 +2200,10 @@ footer {
   .trust-number { font-size: 14px; }
   .trust-label { font-size: 11px; line-height: 1.35; }
   .steps { grid-template-columns: 1fr; gap: 16px; }
-  .features-grid, .redaction-grid { grid-template-columns: 1fr; }
+  .features-grid { grid-template-columns: 1fr; }
   .nav-links { display: none; }
   .nav-toggle { display: flex; }
+  .nav-inner { padding: 0 16px; }
   section { padding: 56px 16px; }
   .problem-section, .use-cases-section { padding: 56px 16px; }
   .cta-card { padding: 40px 24px; }
@@ -1878,9 +2215,21 @@ footer {
   .pii-chip-icon svg { width: 12px; height: 12px; }
   .pii-chip-label { font-size: 12px; }
   .pii-chip-token { font-size: 10px; }
-  .hero-terminal { margin-top: 40px; }
+  .hero-terminal-body {
+    font-size: 11px;
+    line-height: 1.7;
+    padding: 14px;
+    height: 220px;
+  }
+  .hero-terminal-caption {
+    font-size: 10px;
+    margin-top: 8px;
+  }
   .demo-terminal-bar { flex-wrap: wrap; gap: 8px; }
   .demo-terminal-title { display: none; }
+  .demo-controls { flex-direction: column; width: 100%; }
+  .demo-style-select { width: 100%; font-size: 12px; padding: 10px 28px 10px 12px; }
+  .demo-replay-btn { width: 100%; justify-content: center; font-size: 12px; padding: 10px 16px; }
   .demo-body { grid-template-columns: 1fr; }
   .demo-col-output { display: none; }
   .demo-col-input { border-right: none; }
@@ -1889,6 +2238,8 @@ footer {
   .demo-col-content { font-size: 12px; line-height: 1.8; min-height: 120px; }
   .demo-col { padding: 16px; }
   .demo-footer { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .demo-stats { gap: 14px; }
+  .demo-stat { font-size: 10px; }
   .arch-flow {
     grid-template-columns: 1fr;
     gap: 0;
@@ -1912,17 +2263,8 @@ footer {
     background: rgba(129, 220, 198, 0.3);
   }
   .edit-mode-terminal { margin-top: 40px; }
-  .edit-mode-body {
-    grid-template-columns: 1fr;
-    min-height: auto;
-  }
-  .edit-mode-doc {
-    border-right: none;
-    border-bottom: 1px solid rgba(129, 220, 198, 0.06);
-    padding: 16px;
-    font-size: 13px;
-    line-height: 1.8;
-  }
+  .edit-mode-body { grid-template-columns: 1fr; }
+  .edit-mode-doc { border-right: none; border-bottom: 1px solid rgba(129, 220, 198, 0.06); padding: 16px; font-size: 13px; line-height: 1.8; }
   .edit-mode-doc .entity,
   .edit-mode-doc .manual-redact {
     font-size: 11px;
@@ -1990,18 +2332,17 @@ footer {
   .problem-flow {
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-  }
-  .problem-connector {
-    width: 1px; min-width: 1px; height: 24px;
-  }
-  .problem-connector::before {
-    top: 0; bottom: 0; left: 50%; right: auto; width: 1px; height: 100%;
-    background: linear-gradient(180deg, transparent, var(--accent), transparent);
+    gap: 24px;
   }
   .problem-step { max-width: 100%; }
-  .uc-tab { padding: 10px 8px; font-size: 11px; }
-  .uc-tab svg { display: none; }
+  .problem-example-label { margin-bottom: 6px; font-size: 10px; }
+  .uc-tabs { gap: 3px; padding: 8px 8px 0; }
+  .uc-tab { padding: 8px 8px; gap: 6px; border-radius: 8px 8px 0 0; justify-content: center; }
+  .uc-tab-icon { width: 24px; height: 24px; border-radius: 6px; }
+  .uc-tab-icon svg { width: 13px; height: 13px; }
+  .uc-tab-content { display: none; }
+  .uc-tab-title { font-size: 11px; }
+  .uc-tab-sub { display: none; }
   .uc-panel { padding: 16px 12px; min-height: 200px; }
   .uc-scenario-before, .uc-scenario-after { font-size: 11px; padding: 12px; line-height: 1.7; }
 }
@@ -2037,12 +2378,31 @@ footer {
 
 <!-- Mobile menu -->
 <div class="mobile-menu" role="navigation" aria-label="Mobile navigation">
-  <a href="#problem">Problem</a>
-  <a href="#demo">Demo</a>
-  <a href="#how-it-works">How it works</a>
-  <a href="#edit-mode">Edit Mode</a>
-  <a href="#use-cases">Use Cases</a>
-  <a href="#download">Download</a>
+  <a href="#problem">
+    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Problem
+  </a>
+  <a href="#demo">
+    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+    Live Demo
+  </a>
+  <a href="#how-it-works">
+    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    How It Works
+  </a>
+  <div class="mobile-menu-divider"></div>
+  <a href="#edit-mode">
+    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    Edit Mode
+  </a>
+  <a href="#use-cases">
+    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+    Use Cases
+  </a>
+  <a href="#download" style="color: var(--accent); font-weight: 600;">
+    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Download
+  </a>
 </div>
 
 <!-- Hero -->
@@ -2051,7 +2411,11 @@ footer {
   <div class="hero-content reveal">
     <div class="hero-badge" aria-label="Open core and local-first">
       <span class="dot" aria-hidden="true"></span>
-      Open Core &middot; Local-First &middot; Built for Italian Documents
+      <span class="badge-labels">
+        <span class="badge-label badge-label-1">Open Core</span>
+        <span class="badge-label badge-label-2">Local-First</span>
+        <span class="badge-label badge-label-3">Built for Italian Documents</span>
+      </span>
     </div>
     <h1>Redact sensitive data<br>before AI sees it.</h1>
     <p>Privacy Guard removes personal data from text and documents before you paste them into ChatGPT, Claude, Gemini, or other cloud AI tools. Available as a desktop app, CLI, and local API.</p>
@@ -2093,8 +2457,9 @@ footer {
       <p class="section-desc">One paste can expose names, IDs, contracts and financial details to third-party infrastructure you don't control.</p>
     </div>
     <div class="problem-flow stagger-children">
-      <!-- Step 1: Before AI -->
+      <!-- Example 1: Before AI -->
       <div class="problem-step reveal">
+        <div class="problem-example-label">Example 1</div>
         <div class="problem-mini-terminal">
           <div class="problem-terminal-bar">
             <div class="problem-terminal-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
@@ -2121,11 +2486,9 @@ footer {
         </div>
       </div>
 
-      <!-- Connector -->
-      <div class="problem-connector"><div class="problem-connector-dot"></div></div>
-
-      <!-- Step 2: Before sharing -->
+      <!-- Example 2: Before sharing -->
       <div class="problem-step reveal">
+        <div class="problem-example-label">Example 2</div>
         <div class="problem-mini-terminal">
           <div class="problem-terminal-bar">
             <div class="problem-terminal-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
@@ -2151,11 +2514,9 @@ footer {
         </div>
       </div>
 
-      <!-- Connector -->
-      <div class="problem-connector"><div class="problem-connector-dot"></div></div>
-
-      <!-- Step 3: Before automation -->
+      <!-- Example 3: Before automation -->
       <div class="problem-step reveal">
+        <div class="problem-example-label">Example 3</div>
         <div class="problem-mini-terminal">
           <div class="problem-terminal-bar">
             <div class="problem-terminal-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
@@ -2336,16 +2697,18 @@ footer {
         <div class="edit-mode-dot"></div>
         <span class="edit-mode-bar-title">contract-draft.docx — Edit Mode</span>
         <div class="edit-mode-bar-actions">
-          <button class="edit-mode-bar-btn" id="em-undo-all" title="Reset all changes">Undo All</button>
+          <button class="edit-mode-bar-btn hidden" id="em-undo-all" title="Reset all changes"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
         </div>
       </div>
       <div class="edit-mode-body">
         <div class="edit-mode-doc" id="em-doc">
-          <div>On <span class="entity" data-entity="date" data-idx="0" tabindex="0" role="button" aria-label="Restore date entity: January 15, 2025">January 15, 2025</span>, <span class="entity" data-entity="name" data-idx="1" tabindex="0" role="button" aria-label="Restore name entity: Sarah Chen">Sarah Chen</span> (<span class="entity" data-entity="email" data-idx="2" tabindex="0" role="button" aria-label="Restore email entity: sarah@acme.io">sarah@acme.io</span>) entered into agreement with <span class="entity" data-entity="name" data-idx="3" tabindex="0" role="button" aria-label="Restore name entity: GlobalTech Ltd">GlobalTech Ltd</span> for consulting services.</div>
+          <div style="color: var(--text); font-weight: 600; margin-bottom: 8px;">CONSULTING AGREEMENT</div>
+          <div style="margin-bottom: 16px; color: var(--muted); font-size: 12px;">Ref: CA-2025-0041 &middot; Effective: <span class="entity" data-entity="date" data-value="January 15, 2025" tabindex="0" role="button" aria-label="Reveal date">[DATE]</span></div>
+          <div>This agreement is entered into between <span class="entity" data-entity="name" data-value="Sarah Chen" tabindex="0" role="button" aria-label="Reveal name">[NAME]</span> (<span class="entity" data-entity="email" data-value="sarah@acme.io" tabindex="0" role="button" aria-label="Reveal email">[EMAIL]</span>) and <span class="entity" data-entity="company" data-value="GlobalTech Ltd" tabindex="0" role="button" aria-label="Reveal company">[COMPANY]</span> for software consulting services.</div>
           <br>
-          <div>The contractor's SSN (<span class="entity" data-entity="ssn" data-idx="4" tabindex="0" role="button" aria-label="Restore SSN entity: 123-45-6789">123-45-6789</span>) and phone (<span class="entity" data-entity="phone" data-idx="5" tabindex="0" role="button" aria-label="Restore phone entity: (415) 555-0192">(415) 555-0192</span>) are on file. Payment of $<span class="entity" data-entity="amount" data-idx="6" tabindex="0" role="button" aria-label="Restore amount entity: $15,000">15,000</span> will be wired to IBAN <span class="entity" data-entity="iban" data-idx="7" tabindex="0" role="button" aria-label="Restore IBAN entity: DE89 3704 0044 0532 0130 00">DE89 3704 0044 0532 0130 00</span>.</div>
+          <div>The contractor's SSN <span class="entity" data-entity="ssn" data-value="123-45-6789" tabindex="0" role="button" aria-label="Reveal SSN">[SSN]</span> and phone <span class="entity" data-entity="phone" data-value="(415) 555-0192" tabindex="0" role="button" aria-label="Reveal phone">[PHONE]</span> are on file. Payment of <span class="entity" data-entity="amount" data-value="$15,000" tabindex="0" role="button" aria-label="Reveal amount">[AMOUNT]</span> will be wired to IBAN <span class="entity" data-entity="iban" data-value="DE89 3704 0044 0532 0130 00" tabindex="0" role="button" aria-label="Reveal IBAN">[IBAN]</span>.</div>
           <br>
-          <div>Both parties acknowledge the NDA signed on <span class="entity" data-entity="date" data-idx="8" tabindex="0" role="button" aria-label="Restore date entity: March 3, 2024">March 3, 2024</span>. Contact <span class="entity" data-entity="name" data-idx="1" tabindex="0" role="button" aria-label="Restore name entity: Sarah Chen">Sarah Chen</span> at <span class="entity" data-entity="email" data-idx="2" tabindex="0" role="button" aria-label="Restore email entity: sarah@acme.io">sarah@acme.io</span> for amendments.</div>
+          <div>Both parties acknowledge the NDA signed on <span class="entity" data-entity="date" data-value="March 3, 2024" tabindex="0" role="button" aria-label="Reveal date">[DATE]</span>. Contact <span class="entity" data-entity="name" data-value="Sarah Chen" tabindex="0" role="button" aria-label="Reveal name">[NAME]</span> at <span class="entity" data-entity="email" data-value="sarah@acme.io" tabindex="0" role="button" aria-label="Reveal email">[EMAIL]</span> for amendments.</div>
           <div class="edit-mode-toast" id="em-toast"></div>
         </div>
         <div class="edit-mode-sidebar">
@@ -2354,22 +2717,22 @@ footer {
             <div class="edit-mode-action" id="em-action-1">
               <div class="edit-mode-action-num">1</div>
               <div>
-                <div class="edit-mode-action-text"><strong>Restore false positives</strong></div>
-                <div class="edit-mode-action-hint">Click any highlighted entity to un-redact it</div>
+                <div class="edit-mode-action-text"><strong>Review detections</strong></div>
+                <div class="edit-mode-action-hint">Click any redacted token to reveal the original value</div>
               </div>
             </div>
             <div class="edit-mode-action" id="em-action-2">
               <div class="edit-mode-action-num">2</div>
               <div>
-                <div class="edit-mode-action-text"><strong>Restore by value</strong></div>
-                <div class="edit-mode-action-hint">Click "Sarah Chen" — all occurrences restore at once</div>
+                <div class="edit-mode-action-text"><strong>Reveal by value</strong></div>
+                <div class="edit-mode-action-hint">Click [NAME] — all occurrences of that name reveal at once</div>
               </div>
             </div>
             <div class="edit-mode-action" id="em-action-3">
               <div class="edit-mode-action-num">3</div>
               <div>
-                <div class="edit-mode-action-text"><strong>Add manual redactions</strong></div>
-                <div class="edit-mode-action-hint">Select text to redact something the AI missed</div>
+                <div class="edit-mode-action-text"><strong>Manual redaction</strong></div>
+                <div class="edit-mode-action-hint">Select any text to redact something the AI missed</div>
               </div>
             </div>
           </div>
@@ -2384,7 +2747,7 @@ footer {
               <button class="edit-mode-export-btn" id="em-export-orig">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export ZIP
-                <span class="export-tag warn">original format</span>
+                <span class="export-tag warn">batch compressed</span>
               </button>
             </div>
           </div>
@@ -2468,26 +2831,55 @@ footer {
   <div class="section-inner">
     <div class="reveal">
       <div class="section-label">Built for real workflows</div>
-      <h2 class="section-title">Four scenarios. One tool.</h2>
-      <p class="section-desc">From daily AI usage to legal document review, Privacy Guard adapts to how you work.</p>
+      <h2 class="section-title">Any text. Any format. One tool.</h2>
+      <p class="section-desc">These are common scenarios, but Privacy Guard works with any text you need to clean. Just paste, detect, export.</p>
     </div>
     <div class="use-cases-viewer reveal">
       <div class="uc-tabs" role="tablist">
         <button class="uc-tab active" role="tab" aria-selected="true" data-uc="prompts">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-          AI Prompts
+          <span class="uc-tab-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </span>
+          <span class="uc-tab-content">
+            <span class="uc-tab-title">AI Prompts</span>
+            <span class="uc-tab-sub">ChatGPT, Claude, Gemini</span>
+          </span>
         </button>
         <button class="uc-tab" role="tab" aria-selected="false" data-uc="legal">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          Legal
+          <span class="uc-tab-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </span>
+          <span class="uc-tab-content">
+            <span class="uc-tab-title">Legal</span>
+            <span class="uc-tab-sub">Contracts, filings</span>
+          </span>
         </button>
         <button class="uc-tab" role="tab" aria-selected="false" data-uc="sheets">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
-          Spreadsheets
+          <span class="uc-tab-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+          </span>
+          <span class="uc-tab-content">
+            <span class="uc-tab-title">Data</span>
+            <span class="uc-tab-sub">CSV, XLSX, databases</span>
+          </span>
         </button>
         <button class="uc-tab" role="tab" aria-selected="false" data-uc="automation">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
-          Automation
+          <span class="uc-tab-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+          </span>
+          <span class="uc-tab-content">
+            <span class="uc-tab-title">Automation</span>
+            <span class="uc-tab-sub">CLI, API, pipelines</span>
+          </span>
+        </button>
+        <button class="uc-tab" role="tab" aria-selected="false" data-uc="any">
+          <span class="uc-tab-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>
+          </span>
+          <span class="uc-tab-content">
+            <span class="uc-tab-title">Any text</span>
+            <span class="uc-tab-sub">Your format, your workflow</span>
+          </span>
         </button>
       </div>
 
@@ -2544,6 +2936,16 @@ footer {
           <div class="uc-scenario-note"><strong>Use the CLI or local API to sanitize text</strong> before it enters automated workflows, CI/CD pipelines or data processing scripts.</div>
         </div>
       </div>
+
+      <div class="uc-panel" id="uc-any" role="tabpanel">
+        <div class="uc-scenario">
+          <div class="uc-scenario-label">Any text, any format</div>
+          <div class="uc-scenario-before">Meeting notes from <span class="pii">Dr. Marco Bianchi</span>, phone <span class="pii">+39 02 8731 4520</span>. Patient ID <span class="pii">PT-2024-08192</span> shows elevated markers. Follow-up at <span class="pii">Via Garibaldi 15, Torino</span>. Lab ref: <span class="pii">LAB-8847-AC</span>.</div>
+          <div class="uc-scenario-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg> Ready for any workflow</div>
+          <div class="uc-scenario-after">Meeting notes from <span class="token">[NAME]</span>, phone <span class="token">[PHONE]</span>. Patient ID <span class="token">[ID]</span> shows elevated markers. Follow-up at <span class="token">[ADDRESS]</span>. Lab ref: <span class="token">[ID]</span>.</div>
+          <div class="uc-scenario-note"><strong>Emails, notes, reports, tickets, forms, logs, messages</strong> — if it contains personal data, Privacy Guard can detect and redact it. Paste any text, pick a redaction style, export.</div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -2558,45 +2960,57 @@ footer {
     </div>
     <div class="features-grid stagger-children">
       <div class="feature-card reveal">
-        <div class="feature-icon">
-          <svg viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M4 4h14a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V5a1 1 0 011-1z" stroke="currentColor" stroke-width="1.3"/><path d="M6 8h10M6 11h6M6 14h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        <div class="feature-card-header">
+          <div class="feature-icon">
+            <svg viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M4 4h14a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V5a1 1 0 011-1z" stroke="currentColor" stroke-width="1.3"/><path d="M6 8h10M6 11h6M6 14h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Text Redaction</h3>
         </div>
-        <h3>Text Redaction</h3>
         <p>Paste or type text directly. PII is detected and replaced in real-time with your chosen redaction style.</p>
       </div>
       <div class="feature-card reveal">
-        <div class="feature-icon">
-          <svg viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M4 7V5a1 1 0 011-1h5l2 2h5a1 1 0 011 1v10a1 1 0 01-1 1H5a1 1 0 01-1-1V7z" stroke="currentColor" stroke-width="1.3"/><path d="M8 13h6M10 11v4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        <div class="feature-card-header">
+          <div class="feature-icon">
+            <svg viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M4 7V5a1 1 0 011-1h5l2 2h5a1 1 0 011 1v10a1 1 0 01-1 1H5a1 1 0 01-1-1V7z" stroke="currentColor" stroke-width="1.3"/><path d="M8 13h6M10 11v4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Document Import</h3>
         </div>
-        <h3>Document Import</h3>
         <p>Drag-and-drop PDF, DOCX, XLSX, TXT, MD, or CSV files. Text is extracted and processed locally.</p>
       </div>
       <div class="feature-card reveal">
-        <div class="feature-icon">
-          <svg viewBox="0 0 22 22" fill="none" aria-hidden="true"><rect x="3" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><rect x="12" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><rect x="12" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
+        <div class="feature-card-header">
+          <div class="feature-icon">
+            <svg viewBox="0 0 22 22" fill="none" aria-hidden="true"><rect x="3" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><rect x="12" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><rect x="3" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><rect x="12" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
+          </div>
+          <h3>Batch Processing</h3>
         </div>
-        <h3>Batch Processing</h3>
         <p>Queue multiple files for processing. Export results as TXT or Markdown.</p>
       </div>
       <div class="feature-card reveal">
-        <div class="feature-icon">
-          <svg viewBox="0 0 22 22" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.3"/><path d="M11 7v4l3 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="11" cy="11" r="2" fill="#81dcc6" opacity="0.3"/></svg>
+        <div class="feature-card-header">
+          <div class="feature-icon">
+            <svg viewBox="0 0 22 22" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.3"/><path d="M11 7v4l3 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="11" cy="11" r="2" fill="#81dcc6" opacity="0.3"/></svg>
+          </div>
+          <h3>Entity Review</h3>
         </div>
-        <h3>Entity Review</h3>
         <p>Interactive post-redaction panel. Accept or reject detected entities, add manual redactions, fine-tune results.</p>
       </div>
       <div class="feature-card reveal">
-        <div class="feature-icon">
-          <svg viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M11 3v4M11 15v4M3 11h4M15 11h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="11" cy="11" r="3" stroke="currentColor" stroke-width="1.3"/><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.3" opacity="0.4"/></svg>
+        <div class="feature-card-header">
+          <div class="feature-icon">
+            <svg viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M11 3v4M11 15v4M3 11h4M15 11h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="11" cy="11" r="3" stroke="currentColor" stroke-width="1.3"/><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.3" opacity="0.4"/></svg>
+          </div>
+          <h3>Dual AI Models</h3>
         </div>
-        <h3>Dual AI Models</h3>
         <p>Two local models: one for international PII, one for Italian documents. Switchable from Settings.</p>
       </div>
       <div class="feature-card reveal">
-        <div class="feature-icon">
-          <svg viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M4 17l4-4 3 3 5-5 2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 4h16v14H3z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="feature-card-header">
+          <div class="feature-icon">
+            <svg viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M4 17l4-4 3 3 5-5 2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 4h16v14H3z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>HTTP API + CLI</h3>
         </div>
-        <h3>HTTP API + CLI</h3>
         <p>Local REST API with OpenAPI docs for integration. Standalone CLI binary for headless automation.</p>
       </div>
     </div>
@@ -2611,34 +3025,39 @@ footer {
       <h2 class="section-title">Choose how sensitive data is replaced</h2>
       <p class="section-desc">Three styles, all applied locally. Keep the same entity consistently replaced without revealing the original value.</p>
     </div>
-    <div class="redaction-grid stagger-children">
-      <div class="redaction-card reveal">
-        <div class="redaction-label">Mask</div>
-        <div class="redaction-sample">
-          <div><span class="label">Name:</span> <span class="masked">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span></div>
-          <div><span class="label">Email:</span> <span class="masked">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span></div>
-          <div><span class="label">Phone:</span> <span class="masked">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</span></div>
+    <div class="redaction-demo reveal">
+      <div class="redaction-demo-bar">
+        <div class="redaction-demo-bar-left">
+          <div class="redaction-demo-dots"><span></span><span></span><span></span></div>
+          <span class="redaction-demo-bar-title">Redaction Preview</span>
         </div>
-        <div class="redaction-desc">Maximum visual privacy — no trace of original length.</div>
+        <select class="redaction-style-select" id="redaction-style-select" aria-label="Redaction style">
+          <option value="placeholder">Placeholder [TYPE]</option>
+          <option value="mask">Mask ████████</option>
+          <option value="hash">Hash a3f2b1c8</option>
+        </select>
       </div>
-      <div class="redaction-card reveal">
-        <div class="redaction-label">Placeholder</div>
-        <div class="redaction-sample">
-          <div><span class="label">Name:</span> <span class="redacted">[NAME]</span></div>
-          <div><span class="label">Email:</span> <span class="redacted">[EMAIL]</span></div>
-          <div><span class="label">Phone:</span> <span class="redacted">[PHONE]</span></div>
+      <div class="redaction-demo-body">
+        <div class="redaction-demo-col">
+          <div class="redaction-demo-col-label">Input</div>
+          <div class="redaction-demo-input" id="redact-input">
+            <div><span class="pii">Sarah Chen</span> from Acme Corp</div>
+            <div>Email: <span class="pii">sarah@acme.io</span></div>
+            <div>SSN: <span class="pii">123-45-6789</span></div>
+            <div>Phone: <span class="pii">(415) 555-0192</span></div>
+            <div>Card: <span class="pii">4532-9148-0231-6574</span></div>
+          </div>
         </div>
-        <div class="redaction-desc">Readable output — see what was removed.</div>
-      </div>
-      <div class="redaction-card reveal">
-        <div class="redaction-label">Consistent Hash</div>
-        <div class="redaction-sample">
-          <div><span class="label">Name:</span> <span class="hashed">a3f2b8c1</span></div>
-          <div><span class="label">Email:</span> <span class="hashed">7e4d91f0</span></div>
-          <div><span class="label">Phone:</span> <span class="hashed">b2c8e3a5</span></div>
+        <div class="redaction-demo-arrow">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          <span class="redaction-demo-arrow-label">local</span>
         </div>
-        <div class="redaction-desc">Link records across documents without exposing values.</div>
+        <div class="redaction-demo-col">
+          <div class="redaction-demo-col-label">Output</div>
+          <div class="redaction-demo-output" id="redact-output"></div>
+        </div>
       </div>
+      <div class="redaction-demo-note">Same entity, same replacement — consistent across documents.</div>
     </div>
   </div>
 </section>
@@ -2655,11 +3074,15 @@ footer {
     <div class="arch-flow reveal">
       <!-- Row 1: React UI → Rust Backend -->
       <div class="arch-node">
-        <div class="arch-node-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        <div class="arch-node-header">
+          <div class="arch-node-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <div class="arch-node-header-text">
+            <div class="arch-node-title">React UI</div>
+            <div class="arch-node-sub">TAURI FRONTEND</div>
+          </div>
         </div>
-        <div class="arch-node-title">React UI</div>
-        <div class="arch-node-sub">TAURI FRONTEND</div>
         <div class="arch-node-desc">Desktop shell built with TypeScript and Vite. Renders the redaction interface, entity review panel, and settings.</div>
         <div class="arch-node-tags">
           <span class="arch-node-tag">TypeScript</span>
@@ -2674,11 +3097,15 @@ footer {
       </div>
 
       <div class="arch-node">
-        <div class="arch-node-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        <div class="arch-node-header">
+          <div class="arch-node-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <div class="arch-node-header-text">
+            <div class="arch-node-title">Rust Backend</div>
+            <div class="arch-node-sub">TAURI 2 + AXUM</div>
+          </div>
         </div>
-        <div class="arch-node-title">Rust Backend</div>
-        <div class="arch-node-sub">TAURI 2 + AXUM</div>
         <div class="arch-node-desc">Core engine: spawns the AI sidecar, manages document parsing, serves the local HTTP API, and stores settings in SQLite.</div>
         <div class="arch-node-tags">
           <span class="arch-node-tag">Rust</span>
@@ -2700,11 +3127,15 @@ footer {
 
       <!-- Row 3: OPF Sidecar → Regex Fallback -->
       <div class="arch-node">
-        <div class="arch-node-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/><path d="M12 6v6l4 2"/></svg>
+        <div class="arch-node-header">
+          <div class="arch-node-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div class="arch-node-header-text">
+            <div class="arch-node-title">Local AI Model</div>
+            <div class="arch-node-sub">PII DETECTION</div>
+          </div>
         </div>
-        <div class="arch-node-title">Local AI Model</div>
-        <div class="arch-node-sub">PII DETECTION</div>
         <div class="arch-node-desc">Local AI model for PII detection. ~50M parameters, cached on disk, runs on CPU or Apple Silicon. No network calls.</div>
         <div class="arch-node-tags">
           <span class="arch-node-tag">Python</span>
@@ -2719,11 +3150,15 @@ footer {
       </div>
 
       <div class="arch-node">
-        <div class="arch-node-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="19" cy="17" r="2"/></svg>
+        <div class="arch-node-header">
+          <div class="arch-node-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="19" cy="17" r="2"/></svg>
+          </div>
+          <div class="arch-node-header-text">
+            <div class="arch-node-title">Regex Fallback</div>
+            <div class="arch-node-sub">RUST-NATIVE</div>
+          </div>
         </div>
-        <div class="arch-node-title">Regex Fallback</div>
-        <div class="arch-node-sub">RUST-NATIVE</div>
         <div class="arch-node-desc">Zero-dependency pattern matching when the AI sidecar is unavailable. Covers all 19 PII categories with deterministic rules.</div>
         <div class="arch-node-tags">
           <span class="arch-node-tag">Rust</span>
@@ -2889,23 +3324,23 @@ window.addEventListener('scroll', () => {
 const navToggle = document.querySelector('.nav-toggle');
 const mobileMenu = document.querySelector('.mobile-menu');
 let menuOpen = false;
-navToggle.addEventListener('click', () => {
-  menuOpen = !menuOpen;
-  mobileMenu.style.display = menuOpen ? 'block' : 'none';
+function toggleMenu(open) {
+  menuOpen = typeof open === 'boolean' ? open : !menuOpen;
+  mobileMenu.style.display = menuOpen ? 'flex' : 'none';
   if (menuOpen) {
     requestAnimationFrame(() => mobileMenu.classList.add('open'));
+    document.body.style.overflow = 'hidden';
   } else {
     mobileMenu.classList.remove('open');
+    document.body.style.overflow = '';
+    setTimeout(() => { if (!menuOpen) mobileMenu.style.display = 'none'; }, 300);
   }
+  navToggle.classList.toggle('open', menuOpen);
   navToggle.setAttribute('aria-expanded', menuOpen);
-});
+}
+navToggle.addEventListener('click', () => toggleMenu());
 mobileMenu.querySelectorAll('a').forEach(a => {
-  a.addEventListener('click', () => {
-    menuOpen = false;
-    mobileMenu.classList.remove('open');
-    setTimeout(() => mobileMenu.style.display = 'none', 250);
-    navToggle.setAttribute('aria-expanded', 'false');
-  });
+  a.addEventListener('click', () => toggleMenu(false));
 });
 
 // === COUNTER ANIMATION ===
@@ -2967,7 +3402,9 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
     { type: 'highlight', text: '  [SSN]      ', extra: '123-45-6789' },
     { type: 'highlight', text: '  [PHONE]    ', extra: '(415) 555-0192' },
     { type: 'output', text: '' },
-    { type: 'warning-text', text: '  4 entities redacted. Output ready.' },
+    { type: 'warning-text', text: '  4 entities found, ready to redact. ' },
+    { type: 'output', text: '' },
+    { type: 'prompt-line', text: 'Proceed? (y/n): ', extra: 'y' },
   ];
   let lineIndex = 0;
   let charIndex = 0;
@@ -3013,6 +3450,29 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
         lineIndex++;
         charIndex = 0;
         setTimeout(typeLine, 200);
+      }
+    } else if (line.type === 'prompt-line') {
+      const fullText = line.text;
+      const fullExtra = line.extra || '';
+      if (charIndex < fullText.length) {
+        currentSpan.label.textContent = fullText.substring(0, charIndex + 1);
+        charIndex++;
+        setTimeout(typeLine, 30 + Math.random() * 20);
+      } else if (charIndex < fullText.length + fullExtra.length) {
+        const extraIdx = charIndex - fullText.length;
+        if (!currentSpan.extra) {
+          const extraSpan = document.createElement('span');
+          extraSpan.className = 'highlight';
+          currentSpan.label.parentElement.appendChild(extraSpan);
+          currentSpan.extra = extraSpan;
+        }
+        currentSpan.extra.textContent = fullExtra.substring(0, extraIdx + 1);
+        charIndex++;
+        setTimeout(typeLine, 80 + Math.random() * 40);
+      } else {
+        lineIndex++;
+        charIndex = 0;
+        setTimeout(typeLine, 300);
       }
     } else {
       const fullText = line.text;
@@ -3070,7 +3530,7 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
     { type: 'SSN',   start: 69,  end: 80,  label: '[SSN]',   value: '123-45-6789' },
     { type: 'PHONE', start: 87,  end: 101, label: '[PHONE]', value: '(415) 555-0192' },
     { type: 'URL',   start: 111, end: 126, label: '[URL]',   value: 'https://acme.io' },
-    { type: 'CARD',  start: 133, end: 152, label: '[CARD]',  value: '4532-9148-0231-6574' },
+    { type: 'CARD',  start: 134, end: 153, label: '[CARD]',  value: '4532-9148-0231-6574' },
   ];
 
   let animationId = null;
@@ -3291,9 +3751,13 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
   ];
 
   const entities = doc.querySelectorAll('.entity');
-  let restoredCount = 0;
+  let revealedCount = 0;
   let manualCount = 0;
   const completedActions = new Set();
+
+  function updateUndoVisibility() {
+    undoBtn.classList.toggle('hidden', revealedCount === 0 && manualCount === 0);
+  }
 
   function showToast(msg) {
     toast.textContent = msg;
@@ -3309,48 +3773,54 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
     }
   }
 
-  // 1. Click entity to restore
+  // 1. Click entity token to reveal original value
   entities.forEach(el => {
-    const toggleRestore = () => {
+    const toggleReveal = () => {
       const entityVal = el.dataset.entity;
-      const entityIdx = el.dataset.idx;
+      const originalValue = el.dataset.value;
 
-      if (el.classList.contains('restored')) {
-        // Re-redact this one
-        el.classList.remove('restored');
-        restoredCount--;
+      if (el.classList.contains('revealed')) {
+        // Re-redact: show token again
+        el.textContent = `[${entityVal.toUpperCase()}]`;
+        el.classList.remove('revealed');
+        revealedCount--;
+        updateUndoVisibility();
         showToast('Entity re-redacted');
         return;
       }
 
-      // Restore by value: find all entities with same data-entity value
+      // Reveal by value: find all entities with same data-entity
       const sameValueEls = doc.querySelectorAll(`.entity[data-entity="${entityVal}"]`);
       if (sameValueEls.length > 1) {
         sameValueEls.forEach(e => {
-          if (!e.classList.contains('restored')) {
-            e.classList.add('restored');
-            restoredCount++;
+          if (!e.classList.contains('revealed')) {
+            e.textContent = e.dataset.value;
+            e.classList.add('revealed');
+            revealedCount++;
           }
         });
-        markAction(1); // restore by value
-        showToast(`All "${entityVal}" occurrences restored`);
+        markAction(1); // reveal by value
+        updateUndoVisibility();
+        showToast(`All "${entityVal}" occurrences revealed`);
       } else {
-        el.classList.add('restored');
-        restoredCount++;
-        showToast('Entity restored');
+        el.textContent = originalValue;
+        el.classList.add('revealed');
+        revealedCount++;
+        updateUndoVisibility();
+        showToast('Entity revealed');
       }
-      markAction(0); // restore false positive
+      markAction(0); // review detection
     };
-    el.addEventListener('click', toggleRestore);
+    el.addEventListener('click', toggleReveal);
     el.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        toggleRestore();
+        toggleReveal();
       }
     });
   });
 
-  // 2. Manual redaction via text selection (desktop + mobile)
+  // 2. Manual redaction via text selection — hides selected text
   const handleSelection = () => {
     const sel = window.getSelection();
     if (!sel || sel.isCollapsed || !sel.toString().trim()) return;
@@ -3365,17 +3835,23 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
     const parentEntity = range.commonAncestorContainer.closest?.('.entity') || range.commonAncestorContainer.parentElement?.closest?.('.entity');
     if (parentEntity) return;
 
-    // Wrap selection in a span
+    // Don't allow selecting across manual-redact
+    const parentManual = range.commonAncestorContainer.closest?.('.manual-redact') || range.commonAncestorContainer.parentElement?.closest?.('.manual-redact');
+    if (parentManual) return;
+
+    // Create redacted span — text is hidden, blocks shown
     const span = document.createElement('span');
     span.className = 'manual-redact';
-    span.textContent = selectedText;
-    span.title = 'Click to remove manual redaction';
+    span.dataset.original = selectedText;
+    span.textContent = '\u2588'.repeat(Math.min(selectedText.length, 20));
+    span.title = 'Click to remove redaction';
 
     span.addEventListener('click', () => {
       const parent = span.parentNode;
-      parent.replaceChild(document.createTextNode(span.textContent), span);
+      parent.replaceChild(document.createTextNode(span.dataset.original), span);
       parent.normalize();
       manualCount--;
+      updateUndoVisibility();
       showToast('Manual redaction removed');
     });
 
@@ -3384,6 +3860,7 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
       range.insertNode(span);
       sel.removeAllRanges();
       manualCount++;
+      updateUndoVisibility();
       markAction(2); // manual redaction
       showToast('Manual redaction added');
     } catch(e) {}
@@ -3393,26 +3870,69 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
 
   // Undo All
   undoBtn.addEventListener('click', () => {
-    entities.forEach(el => el.classList.remove('restored'));
+    entities.forEach(el => {
+      el.textContent = `[${el.dataset.entity.toUpperCase()}]`;
+      el.classList.remove('revealed');
+    });
     doc.querySelectorAll('.manual-redact').forEach(span => {
       const parent = span.parentNode;
-      parent.replaceChild(document.createTextNode(span.textContent), span);
+      parent.replaceChild(document.createTextNode(span.dataset.original), span);
       parent.normalize();
     });
-    restoredCount = 0;
+    revealedCount = 0;
     manualCount = 0;
     completedActions.clear();
     actions.forEach(a => a.classList.remove('completed'));
+    updateUndoVisibility();
     showToast('All changes reverted');
   });
 
   // Export buttons
   exportTxt.addEventListener('click', () => {
-    showToast(`Exported TXT — ${restoredCount} restored, ${manualCount} manual`);
+    showToast(`Exported TXT — ${revealedCount} revealed, ${manualCount} manual`);
   });
   exportOrig.addEventListener('click', () => {
     showToast('Exported ZIP — original processed file, no review edits');
   });
+})();
+
+/* === REDACTION STYLES INTERACTIVE === */
+(() => {
+  const select = document.getElementById('redaction-style-select');
+  const output = document.getElementById('redact-output');
+  if (!select || !output) return;
+
+  const data = [
+    { label: 'Name',  value: 'Sarah Chen' },
+    { label: 'Email', value: 'sarah@acme.io' },
+    { label: 'SSN',   value: '123-45-6789' },
+    { label: 'Phone', value: '(415) 555-0192' },
+    { label: 'Card',  value: '4532-9148-0231-6574' },
+  ];
+
+  function simpleHash(str) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+    return ('00000000' + (h >>> 0).toString(16)).slice(-8);
+  }
+
+  function render() {
+    const style = select.value;
+    output.innerHTML = data.map(d => {
+      let redacted;
+      if (style === 'mask') {
+        redacted = `<span class="masked-char">${'\u2588'.repeat(d.value.length)}</span>`;
+      } else if (style === 'hash') {
+        redacted = `<span class="hashed">${simpleHash(d.value)}</span>`;
+      } else {
+        redacted = `<span class="token">[${d.label.toUpperCase()}]</span>`;
+      }
+      return `<div>${d.label}: ${redacted}</div>`;
+    }).join('');
+  }
+
+  select.addEventListener('change', render);
+  render();
 })();
 </script>
 </body>
