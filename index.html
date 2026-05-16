@@ -5,14 +5,43 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privacy Guard — Local PII Redaction for AI Workflows</title>
 <meta name="description" content="Redact names, emails, fiscal codes and 16 more PII types from text and documents before pasting into cloud AI. 100% local processing.">
+<link rel="canonical" href="https://privacyguard.dev/">
+<meta name="robots" content="index, follow">
 <meta property="og:title" content="Privacy Guard — Local PII Redaction for AI Workflows">
 <meta property="og:description" content="Remove PII from text and documents locally before sharing with cloud AI. 19 categories. Zero cloud processing. Open core.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://privacyguard.dev/">
 <meta property="og:image" content="https://privacyguard.dev/og.png">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Privacy Guard — Local PII Redaction for AI Workflows">
+<meta name="twitter:description" content="Remove PII from text and documents locally. 19 categories. Zero cloud calls. Open core.">
+<meta name="twitter:image" content="https://privacyguard.dev/og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" type="image/x-icon" href="/icons/icon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/32x32.png">
+<link rel="icon" type="image/png" sizes="128x128" href="/icons/128x128.png">
+<link rel="apple-touch-icon" href="/icons/128x128@2x.png">
+<link rel="manifest" href="/manifest.json">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Privacy Guard",
+  "operatingSystem": "macOS",
+  "applicationCategory": "SecurityApplication",
+  "description": "Redact sensitive data (PII) from text and documents before sharing with cloud AI. 100% local processing. 19 data categories. Zero cloud calls.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "softwareVersion": "1.0",
+  "url": "https://privacyguard.dev",
+  "screenshot": "https://privacyguard.dev/og.png"
+}
+</script>
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -41,6 +70,19 @@
 }
 
 html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 24px); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal { opacity: 1 !important; transform: none !important; }
+  .pii-marquee-wrap { overflow-x: auto; }
+  .pii-row { animation: none !important; }
+  #bg-canvas { display: none; }
+}
 
 body {
   font-family: var(--font-sans);
@@ -1974,11 +2016,7 @@ footer {
 <nav role="navigation" aria-label="Main navigation">
   <div class="nav-inner">
     <a href="#" class="nav-logo" aria-label="Privacy Guard home">
-      <svg viewBox="0 0 28 28" fill="none" aria-hidden="true">
-        <rect x="2" y="2" width="24" height="24" rx="6" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
-        <path d="M14 7L14 14M14 14L14 21M14 14L7 14M14 14L21 14" stroke="#81dcc6" stroke-width="1.5" stroke-linecap="round"/>
-        <circle cx="14" cy="14" r="3" fill="#81dcc6" opacity="0.8"/>
-      </svg>
+      <img src="/icons/32x32.png" alt="" width="28" height="28" aria-hidden="true">
       Privacy Guard
     </a>
     <div class="nav-links">
@@ -2303,11 +2341,11 @@ footer {
       </div>
       <div class="edit-mode-body">
         <div class="edit-mode-doc" id="em-doc">
-          <div>On <span class="entity" data-entity="date" data-idx="0">January 15, 2025</span>, <span class="entity" data-entity="name" data-idx="1">Sarah Chen</span> (<span class="entity" data-entity="email" data-idx="2">sarah@acme.io</span>) entered into agreement with <span class="entity" data-entity="name" data-idx="3">GlobalTech Ltd</span> for consulting services.</div>
+          <div>On <span class="entity" data-entity="date" data-idx="0" tabindex="0" role="button" aria-label="Restore date entity: January 15, 2025">January 15, 2025</span>, <span class="entity" data-entity="name" data-idx="1" tabindex="0" role="button" aria-label="Restore name entity: Sarah Chen">Sarah Chen</span> (<span class="entity" data-entity="email" data-idx="2" tabindex="0" role="button" aria-label="Restore email entity: sarah@acme.io">sarah@acme.io</span>) entered into agreement with <span class="entity" data-entity="name" data-idx="3" tabindex="0" role="button" aria-label="Restore name entity: GlobalTech Ltd">GlobalTech Ltd</span> for consulting services.</div>
           <br>
-          <div>The contractor's SSN (<span class="entity" data-entity="ssn" data-idx="4">123-45-6789</span>) and phone (<span class="entity" data-entity="phone" data-idx="5">(415) 555-0192</span>) are on file. Payment of $<span class="entity" data-entity="amount" data-idx="6">15,000</span> will be wired to IBAN <span class="entity" data-entity="iban" data-idx="7">DE89 3704 0044 0532 0130 00</span>.</div>
+          <div>The contractor's SSN (<span class="entity" data-entity="ssn" data-idx="4" tabindex="0" role="button" aria-label="Restore SSN entity: 123-45-6789">123-45-6789</span>) and phone (<span class="entity" data-entity="phone" data-idx="5" tabindex="0" role="button" aria-label="Restore phone entity: (415) 555-0192">(415) 555-0192</span>) are on file. Payment of $<span class="entity" data-entity="amount" data-idx="6" tabindex="0" role="button" aria-label="Restore amount entity: $15,000">15,000</span> will be wired to IBAN <span class="entity" data-entity="iban" data-idx="7" tabindex="0" role="button" aria-label="Restore IBAN entity: DE89 3704 0044 0532 0130 00">DE89 3704 0044 0532 0130 00</span>.</div>
           <br>
-          <div>Both parties acknowledge the NDA signed on <span class="entity" data-entity="date" data-idx="8">March 3, 2024</span>. Contact <span class="entity" data-entity="name" data-idx="1">Sarah Chen</span> at <span class="entity" data-entity="email" data-idx="2">sarah@acme.io</span> for amendments.</div>
+          <div>Both parties acknowledge the NDA signed on <span class="entity" data-entity="date" data-idx="8" tabindex="0" role="button" aria-label="Restore date entity: March 3, 2024">March 3, 2024</span>. Contact <span class="entity" data-entity="name" data-idx="1" tabindex="0" role="button" aria-label="Restore name entity: Sarah Chen">Sarah Chen</span> at <span class="entity" data-entity="email" data-idx="2" tabindex="0" role="button" aria-label="Restore email entity: sarah@acme.io">sarah@acme.io</span> for amendments.</div>
           <div class="edit-mode-toast" id="em-toast"></div>
         </div>
         <div class="edit-mode-sidebar">
@@ -2742,6 +2780,7 @@ footer {
 <script>
 // === ANIMATED BACKGROUND ===
 (function() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const canvas = document.getElementById('bg-canvas');
   const ctx = canvas.getContext('2d');
   let w, h, particles = [], mouse = { x: 0, y: 0 };
@@ -3272,7 +3311,7 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
 
   // 1. Click entity to restore
   entities.forEach(el => {
-    el.addEventListener('click', () => {
+    const toggleRestore = () => {
       const entityVal = el.dataset.entity;
       const entityIdx = el.dataset.idx;
 
@@ -3301,6 +3340,13 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
         showToast('Entity restored');
       }
       markAction(0); // restore false positive
+    };
+    el.addEventListener('click', toggleRestore);
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleRestore();
+      }
     });
   });
 
