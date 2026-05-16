@@ -11,11 +11,11 @@
 <meta property="og:description" content="Remove PII from text and documents locally before sharing with cloud AI. 19 categories. Zero cloud processing. Open core.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://privacyguard.dev/">
-<meta property="og:image" content="https://privacyguard.dev/og.png">
+<meta property="og:image" content="https://privacyguard.dev/icons/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Privacy Guard — Local PII Redaction for AI Workflows">
 <meta name="twitter:description" content="Remove PII from text and documents locally. 19 categories. Zero cloud calls. Open core.">
-<meta name="twitter:image" content="https://privacyguard.dev/og.png">
+<meta name="twitter:image" content="https://privacyguard.dev/icons/og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -39,7 +39,7 @@
   },
   "softwareVersion": "1.0",
   "url": "https://privacyguard.dev",
-  "screenshot": "https://privacyguard.dev/og.png"
+  "screenshot": "https://privacyguard.dev/icons/og.png"
 }
 </script>
 <style>
@@ -455,7 +455,7 @@ section {
   font-size: 13px;
   line-height: 1.9;
   color: var(--text-secondary);
-  height: 260px;
+  height: 300px;
   overflow: hidden;
 }
 .hero-terminal-body .prompt { color: var(--accent); }
@@ -2219,7 +2219,7 @@ footer {
     font-size: 11px;
     line-height: 1.7;
     padding: 14px;
-    height: 220px;
+    height: 260px;
   }
   .hero-terminal-caption {
     font-size: 10px;
@@ -2439,7 +2439,6 @@ footer {
         <span class="terminal-title">privacy-guard &mdash; redact</span>
       </div>
       <div class="hero-terminal-body" id="hero-terminal-content">
-        <div><span class="prompt">$ </span><span class="cmd">privacy-guard redact --input email.txt</span></div>
         <div class="output" id="terminal-output"></div>
         <span class="hero-terminal-cursor"></span>
       </div>
@@ -3394,24 +3393,75 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
 // === HERO TERMINAL ANIMATION ===
 (function() {
   const output = document.getElementById('terminal-output');
-  const lines = [
-    { type: 'output', text: 'Scanning for PII entities...' },
-    { type: 'output', text: '' },
-    { type: 'highlight', text: '  [NAME]     ', extra: 'Sarah Chen' },
-    { type: 'highlight', text: '  [EMAIL]    ', extra: 'sarah@acme.io' },
-    { type: 'highlight', text: '  [SSN]      ', extra: '123-45-6789' },
-    { type: 'highlight', text: '  [PHONE]    ', extra: '(415) 555-0192' },
-    { type: 'output', text: '' },
-    { type: 'warning-text', text: '  4 entities found, ready to redact. ' },
-    { type: 'output', text: '' },
-    { type: 'prompt-line', text: 'Proceed? (y/n): ', extra: 'y' },
+
+  const examples = [
+    [
+      { type: 'cmd', text: '$ privacy-guard redact --input email.txt' },
+      { type: 'output', text: '' },
+      { type: 'output', text: 'Scanning for PII entities...' },
+      { type: 'output', text: '' },
+      { type: 'highlight', text: '  [NAME]     ', extra: 'Sarah Chen' },
+      { type: 'highlight', text: '  [EMAIL]    ', extra: 'sarah@acme.io' },
+      { type: 'highlight', text: '  [SSN]      ', extra: '123-45-6789' },
+      { type: 'highlight', text: '  [PHONE]    ', extra: '(415) 555-0192' },
+      { type: 'output', text: '' },
+      { type: 'warning-text', text: '  4 entities found, ready to redact. ' },
+      { type: 'output', text: '' },
+      { type: 'prompt-line', text: 'Proceed? (y/n): ', extra: 'y' },
+    ],
+    [
+      { type: 'cmd', text: '$ privacy-guard redact --input contract.pdf' },
+      { type: 'output', text: '' },
+      { type: 'output', text: 'Scanning for PII entities...' },
+      { type: 'output', text: '' },
+      { type: 'highlight', text: '  [COMPANY]  ', extra: 'Rossi & Partners S.r.l.' },
+      { type: 'highlight', text: '  [PIVA]     ', extra: 'IT 01234567890' },
+      { type: 'highlight', text: '  [CF]       ', extra: 'RSSMRA85T10A562S' },
+      { type: 'highlight', text: '  [IBAN]     ', extra: 'IT60 X054 2811 1010 0000 0123 456' },
+      { type: 'highlight', text: '  [ADDRESS]  ', extra: 'Via Garibaldi 42, Milano' },
+      { type: 'output', text: '' },
+      { type: 'warning-text', text: '  5 entities found, ready to redact. ' },
+      { type: 'output', text: '' },
+      { type: 'prompt-line', text: 'Proceed? (y/n): ', extra: 'y' },
+    ],
+    [
+      { type: 'cmd', text: '$ privacy-guard redact --input support.csv' },
+      { type: 'output', text: '' },
+      { type: 'output', text: 'Scanning for PII entities...' },
+      { type: 'output', text: '' },
+      { type: 'highlight', text: '  [NAME]     ', extra: 'James Wilson' },
+      { type: 'highlight', text: '  [EMAIL]    ', extra: 'j.wilson@corp.co' },
+      { type: 'highlight', text: '  [CARD]     ', extra: '4532-9148-0231-6574' },
+      { type: 'highlight', text: '  [PHONE]    ', extra: '+44 20 7946 0958' },
+      { type: 'highlight', text: '  [IP]       ', extra: '192.168.1.42' },
+      { type: 'output', text: '' },
+      { type: 'warning-text', text: '  5 entities found, ready to redact. ' },
+      { type: 'output', text: '' },
+      { type: 'prompt-line', text: 'Proceed? (y/n): ', extra: 'y' },
+    ],
   ];
+
+  let currentExample = 0;
   let lineIndex = 0;
   let charIndex = 0;
   let currentSpan = null;
+  let stopped = false;
 
   function typeLine() {
-    if (lineIndex >= lines.length) return;
+    if (stopped) return;
+    const lines = examples[currentExample];
+    if (lineIndex >= lines.length) {
+      // Finished this example — pause then loop
+      setTimeout(() => {
+        output.innerHTML = '';
+        lineIndex = 0;
+        charIndex = 0;
+        currentSpan = null;
+        currentExample = (currentExample + 1) % examples.length;
+        typeLine();
+      }, 2000);
+      return;
+    }
     const line = lines[lineIndex];
 
     if (charIndex === 0) {
@@ -3425,6 +3475,15 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
         extraSpan.style.opacity = '0.5';
         div.appendChild(extraSpan);
         currentSpan = { label: labelSpan, extra: extraSpan, line };
+      } else if (line.type === 'cmd') {
+        const promptSpan = document.createElement('span');
+        promptSpan.className = 'prompt';
+        promptSpan.textContent = '$ ';
+        div.appendChild(promptSpan);
+        const cmdSpan = document.createElement('span');
+        cmdSpan.className = 'cmd';
+        div.appendChild(cmdSpan);
+        currentSpan = { label: cmdSpan, line };
       } else {
         const span = document.createElement('span');
         span.className = line.type;
