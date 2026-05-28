@@ -1,6 +1,6 @@
 # privacy-guard-site
 
-Marketing landing page for **Privacy Guard** — a macOS desktop app that redacts PII from text and documents before sharing with cloud AI.
+Marketing landing page for **Privacy Guard** — a macOS and Windows desktop app that redacts PII from text and documents before sharing with cloud AI.
 
 **Live:** [privacy-guard-labs.github.io/privacy-guard-site](https://privacy-guard-labs.github.io/privacy-guard-site/)
 
@@ -61,5 +61,5 @@ npx serve .
 | Features | Six capabilities: text redaction, document import, batch processing, entity review, dual AI models, HTTP API + CLI |
 | Redaction Styles | Live comparison of placeholder, mask, and hash styles |
 | Architecture | Visual flow: React UI → Rust Backend → AI Model / Regex Fallback |
-| CTA | Download button for macOS (Apple Silicon & Intel) |
+| CTA | Download button for macOS and Windows (Apple Silicon) |
 
