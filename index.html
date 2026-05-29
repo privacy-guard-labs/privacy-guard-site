@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privacy Guard — Local PII Redaction for AI Workflows</title>
 <meta name="description" content="Redact names, emails, fiscal codes and 16 more PII types from text and documents before pasting into cloud AI. 100% local processing.">
-<link rel="canonical" href="https://thomas-basadonne.github.io/privacy-guard-landing/">
+<link rel="canonical" href="https://privacy-guard-labs.github.io/privacy-guard-site/">
 <meta name="robots" content="index, follow">
 <meta property="og:title" content="Privacy Guard — Local PII Redaction for AI Workflows">
 <meta property="og:description" content="Remove PII from text and documents locally before sharing with cloud AI. 19 categories. Zero cloud processing. Open core.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://thomas-basadonne.github.io/privacy-guard-landing/">
-<meta property="og:image" content="https://thomas-basadonne.github.io/privacy-guard-landing/icons/og.png?v=2">
+<meta property="og:url" content="https://privacy-guard-labs.github.io/privacy-guard-site/">
+<meta property="og:image" content="https://privacy-guard-labs.github.io/privacy-guard-site/icons/og.png?v=2">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Privacy Guard — Local PII Redaction for AI Workflows">
 <meta name="twitter:description" content="Remove PII from text and documents locally. 19 categories. Zero cloud calls. Open core.">
-<meta name="twitter:image" content="https://thomas-basadonne.github.io/privacy-guard-landing/icons/og.png?v=2">
+<meta name="twitter:image" content="https://privacy-guard-labs.github.io/privacy-guard-site/icons/og.png?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -38,13 +38,31 @@
     "priceCurrency": "USD"
   },
   "softwareVersion": "1.0",
-  "url": "https://thomas-basadonne.github.io/privacy-guard-landing/",
-  "screenshot": "https://thomas-basadonne.github.io/privacy-guard-landing/icons/og.png"
+  "url": "https://privacy-guard-labs.github.io/privacy-guard-site/",
+  "screenshot": "https://privacy-guard-labs.github.io/privacy-guard-site/icons/og.png"
 }
 </script>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
+<!-- Custom cursor -->
+<div class="custom-cursor" id="custom-cursor" aria-hidden="true">
+  <div class="cursor-ring"></div>
+  <div class="cursor-dot"></div>
+  <span class="cursor-label"></span>
+</div>
+
+<!-- Scroll progress bar -->
+<div class="scroll-progress" aria-hidden="true"><div class="scroll-progress-bar"></div></div>
+
+<!-- Page loader -->
+<div class="page-loader" id="page-loader" aria-hidden="true">
+  <div class="loader-logo">
+    <img src="icons/128x128.png" alt="" width="64" height="64">
+    <span>Privacy Guard</span>
+  </div>
+</div>
 
 <!-- Animated background -->
 <canvas id="bg-canvas" aria-hidden="true"></canvas>
@@ -104,7 +122,7 @@
 <!-- Hero -->
 <section class="hero" data-od-id="hero" aria-label="Hero">
   <div class="hero-glow" aria-hidden="true"></div>
-  <div class="hero-content reveal">
+  <div class="hero-content">
     <div class="hero-badge" aria-label="Open core and local-first">
       <span class="dot" aria-hidden="true"></span>
       <span class="badge-labels">
@@ -144,6 +162,7 @@
 </section>
 
 <!-- Problem -->
+<div class="section-divider" aria-hidden="true"></div>
 <section class="problem-section" id="problem" data-od-id="problem" aria-label="The problem">
   <div class="section-inner">
     <div class="reveal">
@@ -646,6 +665,7 @@
 </section>
 
 <!-- Features -->
+<div class="section-divider" aria-hidden="true"></div>
 <section class="features" id="features" data-od-id="features" aria-label="Features">
   <div class="section-inner">
     <div class="reveal">
@@ -764,6 +784,7 @@
 </section>
 
 <!-- Architecture -->
+<div class="section-divider" aria-hidden="true"></div>
 <section class="arch-section" id="architecture" data-od-id="architecture" aria-label="Architecture">
   <div class="section-inner">
     <div class="reveal">
@@ -874,6 +895,7 @@
 </section>
 
 <!-- CTA -->
+<div class="section-divider" aria-hidden="true"></div>
 <section class="cta-section" id="download" data-od-id="cta" aria-label="Download">
   <div class="section-inner">
     <div class="cta-card reveal">
@@ -927,6 +949,7 @@
   </div>
 </footer>
 
-<script src="js/main.js"></script>
+<script src="https://unpkg.com/lenis@1/dist/lenis.min.js" defer></script>
+<script src="js/main.js" defer></script>
 </body>
 </html>

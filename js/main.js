@@ -1,91 +1,31 @@
-// === ANIMATED BACKGROUND ===
-(function() {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const canvas = document.getElementById('bg-canvas');
-  const ctx = canvas.getContext('2d');
-  let w, h, particles = [], mouse = { x: 0, y: 0 };
+// === LENIS SMOOTH SCROLL ===
+const lenis = (() => {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+  if (typeof Lenis === 'undefined') return null;
 
-  function resize() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  // Track mouse for parallax
-  document.addEventListener('mousemove', e => {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
+  const l = new Lenis({
+    duration: 1.2,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    smoothWheel: true,
+    touchMultiplier: 1.5,
+  });
+  // Handle anchor link clicks for smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      const id = link.getAttribute('href');
+      if (!id || id === '#') return;
+      const target = document.querySelector(id);
+      if (target) {
+        e.preventDefault();
+        const y = target.getBoundingClientRect().top + window.scrollY - 80;
+        l.scrollTo(y, { duration: 1.5 });
+      }
+    });
   });
 
-  // Create particles
-  const PARTICLE_COUNT = Math.min(80, Math.floor(window.innerWidth / 20));
-  for (let i = 0; i < PARTICLE_COUNT; i++) {
-    particles.push({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: (Math.random() - 0.5) * 0.3,
-      r: Math.random() * 1.5 + 0.5,
-      alpha: Math.random() * 0.3 + 0.05
-    });
-  }
-
-  function draw() {
-    ctx.clearRect(0, 0, w, h);
-
-    // Draw connections
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const dx = particles[i].x - particles[j].x;
-        const dy = particles[i].y - particles[j].y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 150) {
-          const alpha = (1 - dist / 150) * 0.06;
-          ctx.strokeStyle = `rgba(129, 220, 198, ${alpha})`;
-          ctx.lineWidth = 0.5;
-          ctx.beginPath();
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.stroke();
-        }
-      }
-    }
-
-    // Draw and update particles
-    for (const p of particles) {
-      // Subtle mouse repulsion
-      const dx = p.x - mouse.x;
-      const dy = p.y - mouse.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 200) {
-        const force = (200 - dist) / 200 * 0.02;
-        p.vx += dx / dist * force;
-        p.vy += dy / dist * force;
-      }
-
-      p.x += p.vx;
-      p.y += p.vy;
-
-      // Damping
-      p.vx *= 0.99;
-      p.vy *= 0.99;
-
-      // Bounds
-      if (p.x < 0) { p.x = 0; p.vx *= -1; }
-      if (p.x > w) { p.x = w; p.vx *= -1; }
-      if (p.y < 0) { p.y = 0; p.vy *= -1; }
-      if (p.y > h) { p.y = h; p.vy *= -1; }
-
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(129, 220, 198, ${p.alpha})`;
-      ctx.fill();
-    }
-
-    requestAnimationFrame(draw);
-  }
-  draw();
+  function raf(time) { l.raf(time); requestAnimationFrame(raf); }
+  requestAnimationFrame(raf);
+  return l;
 })();
 
 // === SCROLL REVEAL ===
@@ -96,8 +36,213 @@ const revealObserver = new IntersectionObserver((entries) => {
     }
   });
 }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
-
 document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+// === CUSTOM CURSOR ===
+(function() {
+  const isMobile = window.matchMedia('(pointer: coarse)').matches;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (isMobile || reducedMotion) return;
+
+  const cursor = document.getElementById('custom-cursor');
+  if (!cursor) return;
+  const ring = cursor.querySelector('.cursor-ring');
+  const dot = cursor.querySelector('.cursor-dot');
+  const label = cursor.querySelector('.cursor-label');
+
+  let mx = 0, my = 0, rx = 0, ry = 0, dx = 0, dy = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    mx = e.clientX;
+    my = e.clientY;
+    cursor.classList.add('active');
+  });
+  document.addEventListener('mouseleave', () => cursor.classList.remove('active'));
+  document.addEventListener('mousedown', () => cursor.classList.add('clicking'));
+  document.addEventListener('mouseup', () => cursor.classList.remove('clicking'));
+
+  function update() {
+    dx += (mx - dx) * 0.2;
+    dy += (my - dy) * 0.2;
+    dot.style.transform = `translate(${dx}px, ${dy}px) translate(-50%, -50%)`;
+    rx += (mx - rx) * 0.08;
+    ry += (my - ry) * 0.08;
+    ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`;
+    label.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, 20px)`;
+    requestAnimationFrame(update);
+  }
+  update();
+
+  const interactiveEls = 'a, button, .btn-primary, .btn-secondary';
+  const entityEls = '.edit-mode-terminal .entity, .demo-entity';
+  document.addEventListener('mouseover', (e) => {
+    const t = e.target;
+    if (t.closest(entityEls)) {
+      cursor.classList.add('entity-hover');
+      cursor.classList.remove('hover');
+      label.textContent = 'Reveal';
+    } else if (t.closest(interactiveEls)) {
+      cursor.classList.add('hover');
+      cursor.classList.remove('entity-hover');
+      label.textContent = '';
+    }
+  });
+  document.addEventListener('mouseout', (e) => {
+    const t = e.target;
+    if (t.closest(entityEls) || t.closest(interactiveEls)) {
+      cursor.classList.remove('hover', 'entity-hover');
+      label.textContent = '';
+    }
+  });
+})();
+
+// === FEATURE CARD TILT ===
+(function() {
+  const isMobile = window.matchMedia('(pointer: coarse)').matches;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (isMobile || reducedMotion) return;
+  document.querySelectorAll('.feature-card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      card.style.transform = `perspective(800px) rotateY(${x * 4}deg) rotateX(${-y * 4}deg)`;
+    });
+    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+  });
+})();
+
+// === PAGE LOAD SEQUENCE ===
+(function() {
+  const loader = document.getElementById('page-loader');
+  if (!loader) return;
+
+  // Skip if page restored from bfcache (back/forward navigation)
+  let fromCache = false;
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) { fromCache = true; loader.remove(); }
+  });
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function runSequence() {
+    if (fromCache) return;
+    if (reducedMotion) { loader.remove(); return; }
+    loader.classList.add('visible');
+    setTimeout(() => {
+      loader.classList.add('done');
+      loader.style.pointerEvents = 'none';
+      setTimeout(() => loader.remove(), 500);
+    }, 500);
+  }
+
+  // Wait for fonts to load, then run
+  if (document.fonts && document.fonts.ready) {
+    Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 2000))]).then(runSequence);
+  } else {
+    setTimeout(runSequence, 300);
+  }
+})();
+
+// === ANIMATED BACKGROUND ===
+(function() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const canvas = document.getElementById('bg-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let w, h, particles = [], mouse = { x: 0, y: 0 };
+  let canvasVisible = true;
+
+  function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+  document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+  new IntersectionObserver(([e]) => { canvasVisible = e.isIntersecting; }, { threshold: 0 }).observe(canvas);
+
+  const isMobile = window.innerWidth < 768;
+  const COUNT = isMobile ? 30 : Math.min(80, Math.floor(window.innerWidth / 20));
+  for (let i = 0; i < COUNT; i++) {
+    particles.push({
+      x: Math.random() * w, y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+      r: Math.random() * 1.5 + 0.5, alpha: Math.random() * 0.3 + 0.05
+    });
+  }
+
+  function draw() {
+    if (!canvasVisible) { requestAnimationFrame(draw); return; }
+    ctx.clearRect(0, 0, w, h);
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 150) {
+          ctx.strokeStyle = `rgba(129, 220, 198, ${(1 - dist / 150) * 0.06})`;
+          ctx.lineWidth = 0.5;
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+    for (const p of particles) {
+      const dx = p.x - mouse.x, dy = p.y - mouse.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 200) {
+        const force = (200 - dist) / 200 * 0.02;
+        p.vx += dx / dist * force;
+        p.vy += dy / dist * force;
+      }
+      p.x += p.vx; p.y += p.vy;
+      p.vx *= 0.99; p.vy *= 0.99;
+      if (p.x < 0) { p.x = 0; p.vx *= -1; }
+      if (p.x > w) { p.x = w; p.vx *= -1; }
+      if (p.y < 0) { p.y = 0; p.vy *= -1; }
+      if (p.y > h) { p.y = h; p.vy *= -1; }
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(129, 220, 198, ${p.alpha})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// === HERO GLOW MOUSE-REACTIVE ===
+(function() {
+  const isMobile = window.matchMedia('(pointer: coarse)').matches;
+  if (isMobile) return;
+  const glow = document.querySelector('.hero-glow');
+  const hero = document.querySelector('.hero');
+  if (!glow || !hero) return;
+  let mx = 0, my = 0, cx = 0, cy = 0;
+  hero.addEventListener('mousemove', (e) => {
+    const rect = hero.getBoundingClientRect();
+    mx = ((e.clientX - rect.left) / rect.width - 0.5) * 20;
+    my = ((e.clientY - rect.top) / rect.height - 0.5) * 20;
+  });
+  function updateGlow() {
+    cx += (mx - cx) * 0.04;
+    cy += (my - cy) * 0.04;
+    glow.style.transform = `translateX(calc(-50% + ${cx}px)) translateY(${cy}px)`;
+    requestAnimationFrame(updateGlow);
+  }
+  updateGlow();
+})();
+
+// === SCROLL PROGRESS BAR ===
+(function() {
+  const bar = document.querySelector('.scroll-progress-bar');
+  if (!bar) return;
+  function updateProgress() {
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = docHeight > 0 ? `${(window.scrollY / docHeight) * 100}%` : '0%';
+  }
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+})();
 
 // === NAV ===
 const nav = document.querySelector('nav');
@@ -144,7 +289,6 @@ function animateCounter(el) {
   }
   requestAnimationFrame(update);
 }
-
 const counterObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
@@ -231,13 +375,10 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
   let lineIndex = 0;
   let charIndex = 0;
   let currentSpan = null;
-  let stopped = false;
 
   function typeLine() {
-    if (stopped) return;
     const lines = examples[currentExample];
     if (lineIndex >= lines.length) {
-      // Finished this example — pause then loop
       setTimeout(() => {
         output.innerHTML = '';
         lineIndex = 0;
@@ -260,7 +401,7 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
         extraSpan.className = 'output';
         extraSpan.style.opacity = '0.5';
         div.appendChild(extraSpan);
-        currentSpan = { label: labelSpan, extra: extraSpan, line };
+        currentSpan = { label: labelSpan, extra: extraSpan };
       } else if (line.type === 'cmd') {
         const promptSpan = document.createElement('span');
         promptSpan.className = 'prompt';
@@ -269,12 +410,12 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
         const cmdSpan = document.createElement('span');
         cmdSpan.className = 'cmd';
         div.appendChild(cmdSpan);
-        currentSpan = { label: cmdSpan, line };
+        currentSpan = { label: cmdSpan };
       } else {
         const span = document.createElement('span');
         span.className = line.type;
         div.appendChild(span);
-        currentSpan = { label: span, line };
+        currentSpan = { label: span };
       }
       output.appendChild(div);
     }
@@ -333,7 +474,6 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
     }
   }
 
-  // Start when hero is visible
   const heroObserver = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting) {
       setTimeout(typeLine, 800);
@@ -384,11 +524,9 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
   function esc(str) {
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
-
   function sleep(ms) {
     return new Promise(r => { animationId = setTimeout(r, ms); });
   }
-
   function setProgress(pct) {
     progressBar.style.width = pct + '%';
   }
@@ -397,7 +535,6 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
     if (isPlaying) return;
     isPlaying = true;
 
-    // Reset
     inputCol.innerHTML = '<span class="demo-cursor"></span>';
     outputCol.innerHTML = '';
     statEntities.textContent = '0';
@@ -412,7 +549,6 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
 
     await sleep(600);
 
-    // Phase 1: Type input text character by character
     let typed = '';
     const chars = sampleText.split('');
     const typeSpeed = 14;
@@ -429,7 +565,6 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
     setProgress(30);
     await sleep(500);
 
-    // Phase 2: Scanning
     phaseLabel.textContent = 'scanning...';
     phaseLabel.className = 'demo-phase-label scanning';
     scanline.classList.add('active');
@@ -445,32 +580,26 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
     if (isMobile) phaseLabel.textContent = 'redacting...';
 
     for (const entity of sortedEntities) {
-      // Highlight in input
       for (let i = entity.start; i < entity.end; i++) {
         highlighted[i] = true;
       }
 
       if (isMobile) {
-        // Mobile: in-place redaction — replace entity text with token in the input column
         let inputHTML = '';
         let lastIdx = 0;
         const doneEntities = sortedEntities.slice(0, entityCount + 1);
         for (const e of doneEntities) {
-          // Text before this entity
           for (let i = lastIdx; i < e.start; i++) {
             inputHTML += esc(inputChars[i]);
           }
-          // Redacted token
           inputHTML += '<span class="demo-entity-token">' + getRedactedToken(e) + '</span>';
           lastIdx = e.end;
         }
-        // Remaining text after last entity
         for (let i = lastIdx; i < inputChars.length; i++) {
           inputHTML += esc(inputChars[i]);
         }
         inputCol.innerHTML = inputHTML;
       } else {
-        // Desktop: highlight in input, build output
         let inputHTML = '';
         let inHighlight = false;
         for (let i = 0; i < inputChars.length; i++) {
@@ -504,7 +633,6 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
       statEntities.textContent = entityCount;
       statCategories.textContent = foundCategories.size;
       setProgress(30 + (entityCount / sortedEntities.length) * 60);
-
       await sleep(320 + Math.random() * 150);
     }
 
@@ -512,18 +640,15 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
     statTime.textContent = elapsed + 'ms';
     setProgress(95);
 
-    // Phase 3: Done — flash tokens
     phaseLabel.textContent = 'done';
     phaseLabel.className = 'demo-phase-label done';
     scanline.classList.remove('active');
 
     if (isMobile) {
-      // Mobile: flash all tokens in-place
       inputCol.querySelectorAll('.demo-entity-token').forEach((el, i) => {
         setTimeout(() => el.classList.add('flash'), i * 60);
       });
     } else {
-      // Desktop: flash output tokens + glitch input highlights
       outputCol.querySelectorAll('.demo-entity-token').forEach((el, i) => {
         setTimeout(() => el.classList.add('flash'), i * 60);
       });
@@ -560,29 +685,25 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
   }, { threshold: 0.25 });
   demoObserver.observe(document.querySelector('.demo-stage'));
 
-  // Replay button visibility
   replayBtn.style.opacity = '0.4';
   replayBtn.style.pointerEvents = 'none';
 })();
 
-/* === USE CASES TABS === */
-(() => {
-  const tabs = document.querySelectorAll('.uc-tab');
-  const panels = document.querySelectorAll('.uc-panel');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const target = tab.dataset.uc;
-      tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
-      panels.forEach(p => p.classList.remove('active'));
-      tab.classList.add('active');
-      tab.setAttribute('aria-selected', 'true');
-      const panel = document.getElementById('uc-' + target);
-      if (panel) panel.classList.add('active');
-    });
+// === USE CASES TABS ===
+const ucTabs = document.querySelectorAll('.uc-tab');
+const ucPanels = document.querySelectorAll('.uc-panel');
+ucTabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    ucTabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+    ucPanels.forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    tab.setAttribute('aria-selected', 'true');
+    const target = document.getElementById(`uc-${tab.dataset.uc}`);
+    if (target) target.classList.add('active');
   });
-})();
+});
 
-/* === EDIT MODE === */
+// === EDIT MODE ===
 (() => {
   const doc = document.getElementById('em-doc');
   const toast = document.getElementById('em-toast');
@@ -603,14 +724,12 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
   function updateUndoVisibility() {
     undoBtn.classList.toggle('hidden', revealedCount === 0 && manualCount === 0);
   }
-
   function showToast(msg) {
     toast.textContent = msg;
     toast.classList.add('show');
     clearTimeout(toast._t);
     toast._t = setTimeout(() => toast.classList.remove('show'), 2200);
   }
-
   function markAction(idx) {
     if (!completedActions.has(idx)) {
       completedActions.add(idx);
@@ -618,14 +737,11 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
     }
   }
 
-  // 1. Click entity token to reveal original value
   entities.forEach(el => {
     const toggleReveal = () => {
       const entityVal = el.dataset.entity;
       const originalValue = el.dataset.value;
-
       if (el.classList.contains('revealed')) {
-        // Re-redact: show token again
         el.textContent = `[${entityVal.toUpperCase()}]`;
         el.classList.remove('revealed');
         revealedCount--;
@@ -633,8 +749,6 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
         showToast('Entity re-redacted');
         return;
       }
-
-      // Reveal by value: find all entities with same data-entity
       const sameValueEls = doc.querySelectorAll(`.entity[data-entity="${entityVal}"]`);
       if (sameValueEls.length > 1) {
         sameValueEls.forEach(e => {
@@ -644,7 +758,7 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
             revealedCount++;
           }
         });
-        markAction(1); // reveal by value
+        markAction(1);
         updateUndoVisibility();
         showToast(`All "${entityVal}" occurrences revealed`);
       } else {
@@ -654,43 +768,31 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
         updateUndoVisibility();
         showToast('Entity revealed');
       }
-      markAction(0); // review detection
+      markAction(0);
     };
     el.addEventListener('click', toggleReveal);
     el.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        toggleReveal();
-      }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleReveal(); }
     });
   });
 
-  // 2. Manual redaction via text selection — hides selected text
   const handleSelection = () => {
     const sel = window.getSelection();
     if (!sel || sel.isCollapsed || !sel.toString().trim()) return;
-
     const range = sel.getRangeAt(0);
     if (!doc.contains(range.commonAncestorContainer)) return;
-
     const selectedText = sel.toString().trim();
     if (selectedText.length < 2) return;
-
-    // Don't allow selecting across entities
     const parentEntity = range.commonAncestorContainer.closest?.('.entity') || range.commonAncestorContainer.parentElement?.closest?.('.entity');
     if (parentEntity) return;
-
-    // Don't allow selecting across manual-redact
     const parentManual = range.commonAncestorContainer.closest?.('.manual-redact') || range.commonAncestorContainer.parentElement?.closest?.('.manual-redact');
     if (parentManual) return;
 
-    // Create redacted span — text is hidden, blocks shown
     const span = document.createElement('span');
     span.className = 'manual-redact';
     span.dataset.original = selectedText;
     span.textContent = '\u2588'.repeat(Math.min(selectedText.length, 20));
     span.title = 'Click to remove redaction';
-
     span.addEventListener('click', () => {
       const parent = span.parentNode;
       parent.replaceChild(document.createTextNode(span.dataset.original), span);
@@ -699,21 +801,19 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
       updateUndoVisibility();
       showToast('Manual redaction removed');
     });
-
     try {
       range.deleteContents();
       range.insertNode(span);
       sel.removeAllRanges();
       manualCount++;
       updateUndoVisibility();
-      markAction(2); // manual redaction
+      markAction(2);
       showToast('Manual redaction added');
     } catch(e) {}
   };
   doc.addEventListener('mouseup', handleSelection);
   doc.addEventListener('touchend', () => setTimeout(handleSelection, 100));
 
-  // Undo All
   undoBtn.addEventListener('click', () => {
     entities.forEach(el => {
       el.textContent = `[${el.dataset.entity.toUpperCase()}]`;
@@ -732,7 +832,6 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
     showToast('All changes reverted');
   });
 
-  // Export buttons
   exportTxt.addEventListener('click', () => {
     showToast(`Exported TXT — ${revealedCount} revealed, ${manualCount} manual`);
   });
@@ -741,7 +840,7 @@ document.querySelectorAll('.pii-count').forEach(el => piiCounterObserver.observe
   });
 })();
 
-/* === REDACTION STYLES INTERACTIVE === */
+// === REDACTION STYLES INTERACTIVE ===
 (() => {
   const select = document.getElementById('redaction-style-select');
   const output = document.getElementById('redact-output');
